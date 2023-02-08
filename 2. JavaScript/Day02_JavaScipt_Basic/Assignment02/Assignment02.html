@@ -7,73 +7,75 @@
 </head>
 
 <body>
-    <h1>Sort People</h1>
-    <form id="sortForm">
-        <div>
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" required>
-        </div>
-        <div>
-            <label for="age">Age:</label>
-            <input type="number" id="age" name="age" required>
-        </div>
-        <div>
-            <label for="salary">Salary:</label>
-            <input type="number" id="salary" name="salary" required>
-        </div>
-        <div>
-            <label for="sex">Sex:</label>
-            <select id="sex" name="sex" required>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-            </select>
-        </div>
-        <div>
-            <label for="sortField">Sort by:</label>
-            <select id="sortField" name="sortField" required>
-                <option value="name">Name</option>
-                <option value="age">Age</option>
-                <option value="salary">Salary</option>
-                <option value="sex">Sex</option>
-            </select>
-        </div>
-        <div>
-            <label for="sortOrder">Sort order:</label>
-            <select id="sortOrder" name="sortOrder" required>
-                <option value="asc">Ascending</option>
-                <option value="desc">Descending</option>
-            </select>
-        </div>
-        <button type="submit">Submit</button>
+    <h1>Enter Person Details</h1>
+    <form id="person-form">
+        <label>Name:</label>
+        <input type="text" id="name" required><br><br>
+        <label>Age:</label>
+        <input type="number" id="age" required><br><br>
+        <label>Salary:</label>
+        <input type="number" id="salary" required><br><br>
+        <label>Sex:</label>
+        <select id="sex" required>
+            <option value="">Select</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+        </select><br><br>
+        <input type="submit" value="Submit">
     </form>
-    <div id="results"></div>
+    <br><br>
+    <button id="sort-btn">Sort</button>
+    <div id="sort-options" style="display:none">
+        <label>Sort By:</label>
+        <select id="sort-field">
+            <option value="">Select</option>
+            <option value="name">Name</option>
+            <option value="age">Age</option>
+            <option value="salary">Salary</option>
+            <option value="sex">Sex</option>
+        </select>
+        <br><br>
+        <label>Order:</label>
+        <select id="sort-order">
+            <option value="">Select</option>
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+        </select>
+        <br><br>
+        <button id="confirm-sort">Confirm</button>
+    </div>
+    <br><br>
+    <div id="result"></div>
     <script>
-        const sortForm = document.getElementById("sortForm");
-        const results = document.getElementById("results");
+        const form = document.getElementById("person-form");
+        const sortBtn = document.getElementById("sort-btn");
+        const sortOptions = document.getElementById("sort-options");
+        const sortField = document.getElementById("sort-field");
+        const sortOrder = document.getElementById("sort-order");
+        const confirmSort = document.getElementById("confirm-sort");
+        const result = document.getElementById("result");
 
-        sortForm.addEventListener("submit", function (event) {
+        let persons = [];
+
+        form.addEventListener("submit", function (event) {
             event.preventDefault();
-
-            const name = document.getElementById("name").value;
-            const age = parseInt(document.getElementById("age").value);
-            const salary = parseInt(document.getElementById("salary").value);
-            const sex = document.getElementById("sex").value;
-            const sortField = document.getElementById("sortField").value;
-            const sortOrder = document.getElementById("sortOrder").value;
-
-            const person = { name, age, salary, sex };
-            let people = [person];
-
-            const sortedPeople = Person.sort(people, sortField, sortOrder);
-
-            results.innerHTML = `
-          <h2>Before sorting</h2>
-          <pre>${JSON.stringify(people, null, 2)}</pre>
-          <h2>After sorting</h2>
-          <pre>${JSON.stringify(sortedPeople, null, 2)}</pre>
-        `;
+            const person = {
+                name: form.elements.name.value,
+                age: form.elements.age.value,
+                salary: form.elements.salary.value,
+                sex: form.elements.sex.value
+            };
+            people.push(person);
+            const peopleList = document.getElementById("people-list");
+            peopleList.innerHTML = "";
+            people.forEach(function (person) {
+                const item = document.createElement("li");
+                item.innerHTML = `Name: ${person.name}, Age: ${person.age}, Salary: ${person.salary}, Sex: ${person.sex}`;
+                peopleList.appendChild(item);
+            });
         });
+
 
         class Person {
             constructor(name, age, salary, sex) {
@@ -84,37 +86,30 @@
             }
 
             static sort(arr, field, order) {
-                const orderFactor = order === 'asc' ? 1 : -1;
-
+                const key = (a) => a[field];
                 return arr.slice().sort((a, b) => {
-                    if (a[field] < b[field]) return -1 * orderFactor;
-                    if (a[field] > b[field]) return 1 * orderFactor;
-                    return 0;
+                    const x = key(a);
+                    const y = key(b);
+                    return (order === "asc") ? ((x < y) ? -1 : ((x > y) ? 1 : 0)) : ((x > y) ? -1 : ((x < y) ? 1 : 0));
                 });
             }
         }
+        const people = [];
 
-        const sortPeople = () => {
-            const name = document.getElementById('name').value;
-            const age = document.getElementById('age').value;
-            const salary = document.getElementById('salary').value;
-            const sex = document.getElementById('sex').value;
-            const sortField = document.getElementById('sort-field').value;
-            const sortOrder = document.getElementById('sort-order').value;
 
-            const people = [
-                new Person(name, age, salary, sex),
-                new Person('John', 30, 5000, 'Male'),
-                new Person('Jane', 25, 6000, 'Female'),
-                new Person('Jim', 35, 7000, 'Male'),
-                new Person('Joan', 40, 8000, 'Female'),
-            ];
-
+        const sortButton = document.getElementById("sort-button");
+        sortButton.addEventListener("click", function () {
+            const sortField = prompt("Enter the field to sort by (name, age, salary, sex):");
+            const sortOrder = prompt("Enter the sort order (asc, desc):");
             const sortedPeople = Person.sort(people, sortField, sortOrder);
-
-            const result = document.getElementById('result');
-            result.innerHTML = `Before: ${JSON.stringify(people)}<br> After: ${JSON.stringify(sortedPeople)}`;
-        };
+            const sortedList = document.getElementById("sorted-list");
+            sortedList.innerHTML = "";
+            sortedPeople.forEach(function (person) {
+                const item = document.createElement("li");
+                item.innerHTML = `Name: ${person.name}, Age: ${person.age}, Salary: ${person.salary}, Sex: ${person.sex}`;
+                sortedList.appendChild(item);
+            });
+        });
     </script>
 </body>
 
