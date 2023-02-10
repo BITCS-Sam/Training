@@ -7,6 +7,8 @@ export default class WindowSizeList extends Component {
         this.state = { windowWidth: window.innerWidth, item: [] }
     }
 
+
+
     render() {
         return (
             <>
